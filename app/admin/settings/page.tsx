@@ -155,7 +155,7 @@ export default function AdminSettingsPage() {
             <h2 className="text-3xl font-bold">Settings</h2>
             <p className="text-muted-foreground">Configure your blog</p>
           </div>
-          <Button onClick={handleSave} disabled={isSaving}>
+          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSave} disabled={isSaving}>
             <Save className="mr-2 h-4 w-4" />
             {isSaving ? "Saving..." : "Save Changes"}
           </Button>

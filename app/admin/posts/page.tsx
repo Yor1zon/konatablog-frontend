@@ -112,7 +112,7 @@ export default function AdminPostsPage() {
             <h2 className="text-3xl font-bold">Posts</h2>
             <p className="text-muted-foreground">Manage your blog posts</p>
           </div>
-          <Button onClick={() => router.push("/admin/posts/new")}>
+          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={() => router.push("/admin/posts/new")}>
             <Plus className="mr-2 h-4 w-4" />
             New Post
           </Button>
@@ -130,7 +130,7 @@ export default function AdminPostsPage() {
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
-          <Button onClick={handleSearch}>Search</Button>
+          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSearch}>Search</Button>
         </div>
 
         {/* Table */}

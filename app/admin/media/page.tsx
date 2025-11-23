@@ -143,7 +143,7 @@ export default function AdminMediaPage() {
             <h2 className="text-3xl font-bold">Media Library</h2>
             <p className="text-muted-foreground">Manage your images and files</p>
           </div>
-          <Button onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
             <Upload className="mr-2 h-4 w-4" />
             {isUploading ? "Uploading..." : "Upload File"}
           </Button>

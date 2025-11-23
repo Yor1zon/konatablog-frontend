@@ -133,7 +133,7 @@ export default function AdminCategoriesPage() {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()}>
+              <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={() => handleOpenDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Category
               </Button>
@@ -187,7 +187,7 @@ export default function AdminCategoriesPage() {
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleSave}>Save</Button>
+                  <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSave}>Save</Button>
                 </div>
               </div>
             </DialogContent>

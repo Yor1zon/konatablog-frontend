@@ -67,7 +67,11 @@ export default function AdminThemesPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Button variant={theme.active ? "outline" : "default"} className="w-full" disabled={theme.active}>
+                <Button
+                  variant={theme.active ? "outline" : "default"}
+                  className={`w-full ${!theme.active ? "bg-slate-900 text-white hover:bg-slate-800" : ""}`}
+                  disabled={theme.active}
+                >
                   {theme.active ? "Currently Active" : "Activate Theme"}
                 </Button>
               </CardContent>
