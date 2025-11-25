@@ -36,16 +36,20 @@ export function Sidebar({ searchQuery, onSearchChange }: SidebarProps) {
       <div>
         <h3 className="text-lg font-bold mb-6">Tags</h3>
         <div className="flex flex-wrap gap-2">
-          {MOCK_TAGS.map((tag) => (
-            <Link key={tag.id} href={`/tags/${tag.slug}`}>
-              <Badge
-                variant="secondary"
-                className="px-3 py-1 text-sm font-normal hover:bg-muted-foreground/20 transition-colors cursor-pointer"
-              >
-                {tag.name}
-              </Badge>
-            </Link>
-          ))}
+          {MOCK_TAGS.length > 0 ? (
+            MOCK_TAGS.map((tag) => (
+              <Link key={tag.id} href={`/tags/${tag.slug}`}>
+                <Badge
+                  variant="secondary"
+                  className="px-3 py-1 text-sm font-normal hover:bg-muted-foreground/20 transition-colors cursor-pointer"
+                >
+                  {tag.name}
+                </Badge>
+              </Link>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">No tags available</p>
+          )}
         </div>
       </div>
 

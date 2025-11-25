@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Calendar, Eye, ArrowLeft, TagIcon } from "lucide-react"
 import Link from "next/link"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
 
 export default function PostDetailPage() {
   const params = useParams()
@@ -91,7 +92,7 @@ export default function PostDetailPage() {
               {post.isFeatured && <Badge variant="default">Featured</Badge>}
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-balance">{post.title}</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 text-balance blog-title">{post.title}</h1>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
@@ -106,13 +107,8 @@ export default function PostDetailPage() {
             </div>
           </header>
 
-          <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
-            {/* Simple markdown-like rendering */}
-            {post.content.split("\n").map((paragraph, index) => (
-              <p key={index} className="mb-4 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+          <div className="mb-8">
+            <MarkdownRenderer content={post.content} />
           </div>
 
           {post.tags.length > 0 && (

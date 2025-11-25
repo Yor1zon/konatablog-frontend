@@ -6,24 +6,24 @@
 :root {
   /* Updated background color to #FAFBFC as requested */
   --background: #fafbfc;
-  --foreground: oklch(0.15 0.01 270);
+  --foreground: #3A4F66;
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.01 270);
+  --card-foreground: #192A3D;
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.01 270);
-  --primary: oklch(0.45 0.18 265);
+  --popover-foreground: #192A3D;
+  --primary: #192A3D;
   --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.96 0.01 270);
-  --secondary-foreground: oklch(0.15 0.01 270);
+  --secondary-foreground: #192A3D;
   --muted: oklch(0.96 0.01 270);
-  --muted-foreground: oklch(0.55 0.02 270);
+  --muted-foreground: #3A4F66;
   --accent: oklch(0.94 0.02 270);
-  --accent-foreground: oklch(0.15 0.01 270);
+  --accent-foreground: #192A3D;
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.9 0.01 270);
   --input: oklch(0.9 0.01 270);
-  --ring: oklch(0.45 0.18 265);
+  --ring: #192A3D;
   --chart-1: oklch(0.55 0.2 265);
   --chart-2: oklch(0.6 0.15 180);
   --chart-3: oklch(0.5 0.12 320);
@@ -31,13 +31,18 @@
   --chart-5: oklch(0.7 0.16 60);
   --radius: 0.5rem;
   --sidebar: oklch(0.99 0 0);
-  --sidebar-foreground: oklch(0.15 0.01 270);
-  --sidebar-primary: oklch(0.45 0.18 265);
+  --sidebar-foreground: #192A3D;
+  --sidebar-primary: #192A3D;
   --sidebar-primary-foreground: oklch(0.99 0 0);
   --sidebar-accent: oklch(0.96 0.01 270);
-  --sidebar-accent-foreground: oklch(0.15 0.01 270);
+  --sidebar-accent-foreground: #192A3D;
   --sidebar-border: oklch(0.9 0.01 270);
-  --sidebar-ring: oklch(0.45 0.18 265);
+  --sidebar-ring: #192A3D;
+
+  /* Custom colors for blog */
+  --blog-title: #192A3D;
+  --blog-text: #3A4F66;
+  --blog-quote: #6b7280;
 }
 
 .dark {
@@ -47,7 +52,7 @@
   --card-foreground: oklch(0.97 0 0);
   --popover: oklch(0.15 0.01 270);
   --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.6 0.2 265);
+  --primary: #374151;
   --primary-foreground: oklch(0.12 0.01 270);
   --secondary: oklch(0.2 0.02 270);
   --secondary-foreground: oklch(0.97 0 0);
@@ -59,7 +64,7 @@
   --destructive-foreground: oklch(0.97 0 0);
   --border: oklch(0.25 0.02 270);
   --input: oklch(0.25 0.02 270);
-  --ring: oklch(0.6 0.2 265);
+  --ring: #6b7280;
   --chart-1: oklch(0.6 0.22 265);
   --chart-2: oklch(0.65 0.18 180);
   --chart-3: oklch(0.55 0.15 320);
@@ -67,12 +72,12 @@
   --chart-5: oklch(0.75 0.18 60);
   --sidebar: oklch(0.15 0.01 270);
   --sidebar-foreground: oklch(0.97 0 0);
-  --sidebar-primary: oklch(0.6 0.2 265);
+  --sidebar-primary: #374151;
   --sidebar-primary-foreground: oklch(0.12 0.01 270);
   --sidebar-accent: oklch(0.2 0.02 270);
   --sidebar-accent-foreground: oklch(0.97 0 0);
   --sidebar-border: oklch(0.25 0.02 270);
-  --sidebar-ring: oklch(0.6 0.2 265);
+  --sidebar-ring: #6b7280;
 }
 
 @theme inline {
@@ -131,18 +136,37 @@
 }
 
 .prose h1 {
+  color: var(--blog-title);
   @apply text-4xl font-bold mb-4 mt-8;
 }
 
 .prose h2 {
+  color: var(--blog-title);
   @apply text-3xl font-bold mb-3 mt-6;
 }
 
 .prose h3 {
+  color: var(--blog-title);
   @apply text-2xl font-semibold mb-2 mt-4;
 }
 
+.prose h4 {
+  color: var(--blog-title);
+  @apply text-xl font-semibold mb-2 mt-4;
+}
+
+.prose h5 {
+  color: var(--blog-title);
+  @apply text-lg font-semibold mb-2 mt-4;
+}
+
+.prose h6 {
+  color: var(--blog-title);
+  @apply text-base font-semibold mb-2 mt-4;
+}
+
 .prose p {
+  color: var(--blog-text);
   @apply mb-4 leading-relaxed;
 }
 
@@ -158,9 +182,14 @@
   @apply bg-transparent p-0;
 }
 
-.prose ul,
+.prose ul {
+  color: var(--blog-text);
+  @apply mb-4 ml-3;
+}
+
 .prose ol {
-  @apply mb-4 ml-6;
+  color: var(--blog-text);
+  @apply mb-4 ml-3;
 }
 
 .prose li {
@@ -172,5 +201,39 @@
 }
 
 .prose blockquote {
-  @apply border-l-4 border-primary pl-4 italic my-4;
+  color: var(--blog-quote);
+  border-left-color: var(--blog-quote);
+  @apply border-l-2 pl-4 italic my-4 max-w-[75%];
+}
+
+/* Additional custom styles for blog titles and text */
+.blog-title {
+  color: var(--blog-title);
+}
+
+.blog-text {
+  color: var(--blog-text);
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  color: var(--blog-title);
+}
+
+.markdown-content p,
+.markdown-content ul,
+.markdown-content ol,
+.markdown-content li {
+  color: var(--blog-text);
+}
+
+.markdown-content blockquote {
+  color: var(--blog-quote);
+  border-left-color: var(--blog-quote);
+  border-left-width: 2px;
+  @apply pl-4 italic my-4 max-w-[75%];
 }

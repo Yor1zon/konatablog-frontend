@@ -39,7 +39,7 @@ export default function AdminPostsPage() {
         setTotalPages(response.data.totalPages)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch posts")
+      setError(err instanceof Error ? err.message : "获取文章失败")
     } finally {
       setIsLoading(false)
     }
@@ -55,22 +55,22 @@ export default function AdminPostsPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this post?")) return
+    if (!confirm("确定要删除这篇文章吗？")) return
 
     try {
       const response = await ApiClient.delete(`/posts/${id}`)
       if (response.success) {
         toast({
-          title: "Success",
-          description: "Post deleted successfully",
+          title: "成功",
+          description: "文章已删除",
         })
         fetchPosts()
       }
     } catch (err) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: err instanceof Error ? err.message : "Failed to delete post",
+        title: "错误",
+        description: err instanceof Error ? err.message : "删除文章失败",
       })
     }
   }
@@ -82,16 +82,16 @@ export default function AdminPostsPage() {
       const response = await ApiClient.post(endpoint)
       if (response.success) {
         toast({
-          title: "Success",
-          description: `Post ${currentStatus === "PUBLISHED" ? "unpublished" : "published"} successfully`,
+          title: "成功",
+          description: `文章已${currentStatus === "PUBLISHED" ? "取消发布" : "发布"}`,
         })
         fetchPosts()
       }
     } catch (err) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: err instanceof Error ? err.message : "Failed to update post status",
+        title: "错误",
+        description: err instanceof Error ? err.message : "更新文章状态失败",
       })
     }
   }
@@ -109,12 +109,11 @@ export default function AdminPostsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold">Posts</h2>
-            <p className="text-muted-foreground">Manage your blog posts</p>
+            <h2 className="text-3xl font-bold">文章</h2>
           </div>
           <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={() => router.push("/admin/posts/new")}>
             <Plus className="mr-2 h-4 w-4" />
-            New Post
+            新建文章
           </Button>
         </div>
 
@@ -123,14 +122,14 @@ export default function AdminPostsPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search posts..."
+              placeholder="搜索文章..."
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
-          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSearch}>Search</Button>
+          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSearch}>搜索</Button>
         </div>
 
         {/* Table */}
@@ -144,7 +143,7 @@ export default function AdminPostsPage() {
           </Alert>
         ) : posts.length === 0 ? (
           <div className="text-center py-20 border rounded-lg">
-            <p className="text-muted-foreground">No posts found.</p>
+            <p className="text-muted-foreground">未找到文章。</p>
           </div>
         ) : (
           <>
@@ -152,12 +151,12 @@ export default function AdminPostsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Views</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>标题</TableHead>
+                    <TableHead>分类</TableHead>
+                    <TableHead>状态</TableHead>
+                    <TableHead>浏览量</TableHead>
+                    <TableHead>日期</TableHead>
+                    <TableHead className="text-right">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -170,7 +169,7 @@ export default function AdminPostsPage() {
                         {post.category ? (
                           <Badge variant="secondary">{post.category.name}</Badge>
                         ) : (
-                          <span className="text-muted-foreground text-sm">No category</span>
+                          <span className="text-muted-foreground text-sm">无分类</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -193,18 +192,18 @@ export default function AdminPostsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => router.push(`/admin/posts/${post.id}`)}>
                               <Edit className="mr-2 h-4 w-4" />
-                              Edit
+                              编辑
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handlePublish(post.id, post.status)}>
-                              {post.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+                              {post.status === "PUBLISHED" ? "取消发布" : "发布"}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => window.open(`/posts/${post.slug}`, "_blank")}>
                               <Eye className="mr-2 h-4 w-4" />
-                              View
+                              查看
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDelete(post.id)} className="text-destructive">
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
+                              删除
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -1,6 +1,7 @@
 import Link from "next/link"
 import type { Post } from "@/lib/api"
 import { MessageSquare, Clock } from "lucide-react"
+import { ExcerptMarkdownRenderer } from "@/components/markdown-renderer"
 
 interface PostCardProps {
   post: Post
@@ -26,19 +27,21 @@ export function PostCard({ post }: PostCardProps) {
 
       {/* Title */}
       <Link href={`/posts/${post.slug}`} className="block group">
-        <h2 className="text-2xl font-bold mb-4 text-foreground group-hover:text-primary transition-colors">
+        <h2 className="text-2xl font-bold mb-4 blog-title group-hover:text-primary transition-colors">
           {post.title}
         </h2>
       </Link>
 
       {/* Excerpt */}
-      <p className="text-muted-foreground mb-4 leading-relaxed line-clamp-3">{post.excerpt}</p>
+      <div className="text-muted-foreground mb-4 leading-relaxed line-clamp-3">
+        <ExcerptMarkdownRenderer content={post.excerpt} />
+      </div>
 
       {/* Metadata */}
       <div className="flex items-center text-xs text-muted-foreground gap-4 font-mono">
         <span className="flex items-center gap-1">
           <span className="font-bold">✎</span>
-          {post.author?.displayName || "NEO"}
+          {post.author?.username || post.author?.displayName || "NEO"}
         </span>
         <span className="flex items-center gap-1">
           <Clock className="h-3 w-3" />

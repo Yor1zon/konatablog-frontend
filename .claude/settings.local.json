@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install react-markdown remark-gfm rehype-highlight react-syntax-highlighter @tailwindcss/typography)",
+      "Bash(npm install --save-dev @types/react-syntax-highlighter)",
+      "Bash(npm install react-markdown remark-gfm)",
+      "Bash(npm install @tailwindcss/typography)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

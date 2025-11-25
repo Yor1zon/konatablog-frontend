@@ -141,8 +141,7 @@ export default function AdminTagsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold">Tags</h2>
-            <p className="text-muted-foreground">Label and categorize your content</p>
+            <h2 className="text-3xl font-bold">标签</h2>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>

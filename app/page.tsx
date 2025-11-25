@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { BlogHeader } from "@/components/blog-header"
 import { PostCard } from "@/components/post-card"
 import { Sidebar } from "@/components/sidebar"
+import { BlogHeader } from "@/components/blog-header"
 import { usePosts } from "@/hooks/use-posts"
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -24,8 +24,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <BlogHeader />
-
-      <main className="flex-1 container mx-auto px-6 md:px-16 lg:px-24 py-12">
+      <main className="flex-1 container mx-auto px-6 md:px-16 lg:px-24 py-3">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Content - 8 columns (reduced from 9 to give more space to sidebar) */}
           <div className="lg:col-span-8 xl:col-span-9">
@@ -52,11 +51,13 @@ export default function HomePage() {
           </div>
 
           {/* Sidebar - 4 columns (increased from 3) */}
-          <div className="lg:col-span-4 xl:col-span-3 pl-4 hidden lg:block">
-            <div className="sticky top-24">
-              <Sidebar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+          <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 pl-4">
+            <div className="lg:sticky lg:top-[9rem]">
+              <div className="lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-3">
+                <Sidebar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+              </div>
             </div>
-          </div>
+          </aside>
         </div>
       </main>
     </div>

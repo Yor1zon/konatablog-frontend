@@ -1,100 +1,10 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8081/api"
 
-export const MOCK_TAGS: Tag[] = [
-  { id: 1, name: "React", slug: "react", color: "#61dafb", createdAt: "", updatedAt: "" },
-  { id: 2, name: "Next.js", slug: "nextjs", color: "#000000", createdAt: "", updatedAt: "" },
-  { id: 3, name: "Performance", slug: "performance", color: "#4caf50", createdAt: "", updatedAt: "" },
-  { id: 4, name: "Microservices", slug: "microservices", color: "#f44336", createdAt: "", updatedAt: "" },
-  { id: 5, name: "Architecture", slug: "architecture", color: "#9c27b0", createdAt: "", updatedAt: "" },
-  { id: 6, name: "UI/UX", slug: "ui-ux", color: "#e91e63", createdAt: "", updatedAt: "" },
-  { id: 7, name: "Design System", slug: "design-system", color: "#2196f3", createdAt: "", updatedAt: "" },
-  { id: 8, name: "DevOps", slug: "devops", color: "#ff9800", createdAt: "", updatedAt: "" },
-]
+export const MOCK_TAGS: Tag[] = []
 
-const MOCK_CATEGORIES: Category[] = [
-  { id: 1, name: "问题笔记", slug: "notes", sortOrder: 1, isActive: true, postCount: 5, createdAt: "", updatedAt: "" },
-  { id: 2, name: "软件调试", slug: "debug", sortOrder: 2, isActive: true, postCount: 3, createdAt: "", updatedAt: "" },
-  {
-    id: 3,
-    name: "前端技术",
-    slug: "frontend",
-    sortOrder: 3,
-    isActive: true,
-    postCount: 8,
-    createdAt: "",
-    updatedAt: "",
-  },
-  { id: 4, name: "随想", slug: "thoughts", sortOrder: 4, isActive: true, postCount: 2, createdAt: "", updatedAt: "" },
-  { id: 5, name: "Java", slug: "java", sortOrder: 5, isActive: true, postCount: 12, createdAt: "", updatedAt: "" },
-]
+const MOCK_CATEGORIES: Category[] = []
 
-const MOCK_POSTS: Post[] = [
-  {
-    id: 101,
-    title: "React 的未来：服务器组件及其他",
-    slug: "future-of-react",
-    excerpt:
-      "React Server Components 正在改变我们要据获取和组件架构的思考方式。让我们探索这对下一代 Web 应用意味着什么。",
-    content: `React Server Components (RSC) 代表了我们构建 React 应用程序方式的范式转变。
-
-传统上，React 是客户端优先的。我们将 JavaScript 发送到浏览器，然后执行以渲染 UI。虽然 SSR and SSG 等技术有助于缩短初始加载时间，但水合（hydration）仍然是一个繁重的过程。
-
-RSC 通过允许组件专门在服务器上运行来改变这一点。这意味着：
-1. **零捆绑包大小**：服务器组件中使用的依赖项不会发送到客户端。
-2. **直接后端访问**：直接从组件查询数据库。
-3. **自动代码拆分**：服务器组件导入的客户端组件会自动进行代码拆分。
-
-这并不意味着客户端组件会消失。相反，我们要转向一种混合模型，使用服务器组件进行数据获取和布局，使用客户端组件进行交互。`,
-    status: "PUBLISHED",
-    isFeatured: true,
-    viewCount: 1205,
-    createdAt: "2025-11-15T10:00:00Z",
-    updatedAt: "2025-11-15T10:00:00Z",
-    author: { id: 1, username: "admin", displayName: "Admin" },
-    category: { id: 3, name: "前端技术", slug: "frontend", sortOrder: 3, isActive: true, createdAt: "", updatedAt: "" },
-    tags: [
-      { id: 1, name: "React", slug: "react", color: "#61dafb", createdAt: "", updatedAt: "" },
-      { id: 2, name: "Next.js", slug: "nextjs", color: "#000000", createdAt: "", updatedAt: "" },
-      { id: 3, name: "Performance", slug: "performance", color: "#4caf50", createdAt: "", updatedAt: "" },
-    ],
-  },
-  {
-    id: 102,
-    title: "理解分布式系统模式",
-    slug: "distributed-systems-patterns",
-    excerpt: "从断路器到 Sagas，掌握分布式系统模式对于构建弹性微服务架构至关重要。",
-    content: "内容占位符...",
-    status: "PUBLISHED",
-    isFeatured: false,
-    viewCount: 892,
-    createdAt: "2025-11-10T14:30:00Z",
-    updatedAt: "2025-11-10T14:30:00Z",
-    author: { id: 1, username: "admin", displayName: "Admin" },
-    category: { id: 2, name: "后端架构", slug: "backend", sortOrder: 2, isActive: true, createdAt: "", updatedAt: "" },
-    tags: [
-      { id: 4, name: "Microservices", slug: "microservices", color: "#f44336", createdAt: "", updatedAt: "" },
-      { id: 5, name: "Architecture", slug: "architecture", color: "#9c27b0", createdAt: "", updatedAt: "" },
-    ],
-  },
-  {
-    id: 103,
-    title: "为什么设计系统对扩展团队至关重要",
-    slug: "design-systems-scaling",
-    excerpt: "一致的设计系统不仅仅是一个组件库——它是团队用来更快、更高质量地构建产品的语言。",
-    content: "内容占位符...",
-    status: "PUBLISHED",
-    isFeatured: false,
-    viewCount: 2341,
-    createdAt: "2025-11-05T09:00:00Z",
-    updatedAt: "2025-11-05T09:00:00Z",
-    author: { id: 1, username: "admin", displayName: "Admin" },
-    category: { id: 4, name: "UI设计", slug: "design", sortOrder: 3, isActive: true, createdAt: "", updatedAt: "" },
-    tags: [
-      { id: 6, name: "UI/UX", slug: "ui-ux", color: "#e91e63", createdAt: "", updatedAt: "" },
-      { id: 7, name: "Design System", slug: "design-system", color: "#2196f3", createdAt: "", updatedAt: "" },
-    ],
-  },
-]
+const MOCK_POSTS: Post[] = []
 
 export interface ApiError {
   code: string
@@ -126,9 +36,9 @@ export class ApiClient {
 
   private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const token = this.getToken()
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...options.headers,
+      ...options.headers as Record<string, string>,
     }
 
     if (token) {
@@ -201,7 +111,14 @@ export class ApiClient {
       if (endpoint.startsWith("/posts")) {
         if (endpoint.includes("/slug/")) {
           const slug = endpoint.split("/slug/")[1]
-          const post = MOCK_POSTS.find((p) => p.slug === slug) || MOCK_POSTS[0]
+          const post = MOCK_POSTS.find((p) => p.slug === slug)
+          if (!post) {
+            return {
+              success: false,
+              data: null,
+              error: { code: "NOT_FOUND", message: "Post not found" }
+            }
+          }
           return {
             success: true,
             data: post as any,
@@ -279,7 +196,7 @@ export class ApiClient {
       })
     }
 
-    const headers: HeadersInit = {}
+    const headers: Record<string, string> = {}
     if (token) {
       headers["Authorization"] = `Bearer ${token}`
     }
