@@ -75,6 +75,8 @@ export default function PostDetailPage() {
     )
   }
 
+  const authorName = post.author?.username
+
   return (
     <div className="min-h-screen flex flex-col">
       <BlogHeader />
@@ -103,7 +105,7 @@ export default function PostDetailPage() {
                 <Eye className="h-4 w-4" />
                 {post.viewCount} views
               </span>
-              <span>By {post.author.displayName}</span>
+              {authorName && <span>By {authorName}</span>}
             </div>
           </header>
 
