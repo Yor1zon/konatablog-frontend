@@ -105,18 +105,12 @@ export default function PostDetailPage() {
                 <Eye className="h-4 w-4" />
                 {post.viewCount} views
               </span>
-              {authorName && <span>By {authorName}</span>}
+              <span>By {post.author.displayName}</span>
             </div>
-          </header>
 
-          <div className="mb-8">
-            <MarkdownRenderer content={post.content} />
-          </div>
-
-          {post.tags.length > 0 && (
-            <footer className="border-t pt-6">
-              <div className="flex items-center gap-2 flex-wrap">
-                <TagIcon className="h-4 w-4 text-muted-foreground" />
+            {post.tags.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap text-sm text-muted-foreground mt-2">
+                <TagIcon className="h-4 w-4" />
                 {post.tags.map((tag) => (
                   <Link key={tag.id} href={`/tags/${tag.slug}`}>
                     <Badge
@@ -129,8 +123,13 @@ export default function PostDetailPage() {
                   </Link>
                 ))}
               </div>
-            </footer>
-          )}
+            )}
+          </header>
+
+          <div className="mb-8">
+            <MarkdownRenderer content={post.content} />
+          </div>
+
         </article>
       </main>
 

@@ -436,8 +436,14 @@ export class ApiClient {
     return this.get<Tag[]>(`/tags/popular?limit=${limit}`)
   }
 
-  static async searchTags(query: string, page = 0, size = 20) {
-    return this.get<PageResponse<Tag>>(`/tags/search?q=${encodeURIComponent(query)}&page=${page}&size=${size}`)
+  static async searchTags(query: string, page = 0, size = 20, ignoreCase = true) {
+    const params = new URLSearchParams()
+    if (query) params.append("q", query)
+    params.append("page", page.toString())
+    params.append("size", size.toString())
+    params.append("ignoreCase", ignoreCase.toString())
+
+    return this.get<PageResponse<Tag>>(`/tags/search?${params.toString()}`)
   }
 
   static async getTagSuggestions(query: string, limit = 8) {
@@ -469,6 +475,14 @@ export class ApiClient {
 
   static async bulkCreateTags(names: string[]) {
     return this.post<Tag[]>("/tags/bulk", { names })
+  }
+
+  static async smartCreateTag(data: { name: string; description?: string; color?: string }) {
+    return this.post<Tag>("/tags/smart-create", data)
+  }
+
+  static async setPostTags(postId: number, tagIds: number[]) {
+    return this.put<Post>(`/posts/${postId}/tags`, { tagIds })
   }
 
   // Media methods
