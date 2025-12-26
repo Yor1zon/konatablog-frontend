@@ -1,6 +1,6 @@
 import Link from "next/link"
 import type { Post } from "@/lib/api"
-import { MessageSquare, Clock } from "lucide-react"
+import { Eye, Clock } from "lucide-react"
 import { ExcerptMarkdownRenderer } from "@/components/markdown-renderer"
 
 interface PostCardProps {
@@ -48,8 +48,8 @@ export function PostCard({ post }: PostCardProps) {
           {formatDate(post.publishedAt || post.createdAt)}
         </span>
         <span className="flex items-center gap-1">
-          <MessageSquare className="h-3 w-3" />
-          {Math.floor(Math.random() * 200) + 100} {/* Mock comment count */}
+          <Eye className="h-3 w-3" />
+          {(post.viewCount ?? 0).toLocaleString()}
         </span>
       </div>
     </div>

@@ -86,13 +86,14 @@ export class ApiClient {
         throw new Error("Invalid credentials")
       }
 
-      if (endpoint === "/auth/profile") {
+      if (endpoint === "/users/me") {
         return {
           success: true,
           data: {
             id: 1,
             username: "admin",
             email: "admin@example.com",
+            displayName: "Admin User",
             nickname: "Admin User",
             role: "ADMIN",
             avatar: "/placeholder.svg",
@@ -108,15 +109,76 @@ export class ApiClient {
         }
       }
 
+      if (endpoint === "/users/me" && options.method === "PUT") {
+        const body = options.body ? JSON.parse(options.body as string) : {}
+        return {
+          success: true,
+          data: {
+            id: 1,
+            username: body.username || "admin",
+            email: body.email || "admin@example.com",
+            displayName: body.displayName || "Admin User",
+            nickname: body.displayName || "Admin User",
+            role: "ADMIN",
+            avatar: "/placeholder.svg",
+            isActive: true,
+          } as any,
+        }
+      }
+
       if (endpoint.startsWith("/posts")) {
+        const parseSlug = (path: string, marker: string) => path.split(marker)[1]
+
+        if (endpoint.startsWith("/posts/admin")) {
+          if (endpoint.includes("/posts/admin/slug/")) {
+            const slug = parseSlug(endpoint, "/posts/admin/slug/")
+            const post = MOCK_POSTS.find((p) => p.slug === slug)
+            if (!post) {
+              return {
+                success: false,
+                data: null,
+                error: { code: "NOT_FOUND", message: "Post not found" },
+              }
+            }
+            return { success: true, data: post as any }
+          }
+
+          if (endpoint.match(/\/posts\/admin\/\d+$/)) {
+            const id = Number.parseInt(endpoint.split("/").pop() || "0")
+            const post = MOCK_POSTS.find((p) => p.id === id)
+            if (!post) {
+              return {
+                success: false,
+                data: null,
+                error: { code: "NOT_FOUND", message: "Post not found" },
+              }
+            }
+            return { success: true, data: post as any }
+          }
+
+          return {
+            success: true,
+            data: {
+              content: MOCK_POSTS,
+              totalPages: 1,
+              totalElements: MOCK_POSTS.length,
+              size: 10,
+              number: 0,
+              first: true,
+              last: true,
+              pageable: {},
+            } as any,
+          }
+        }
+
         if (endpoint.includes("/slug/")) {
-          const slug = endpoint.split("/slug/")[1]
+          const slug = parseSlug(endpoint, "/slug/")
           const post = MOCK_POSTS.find((p) => p.slug === slug)
           if (!post) {
             return {
               success: false,
               data: null,
-              error: { code: "NOT_FOUND", message: "Post not found" }
+              error: { code: "NOT_FOUND", message: "Post not found" },
             }
           }
           return {
@@ -128,9 +190,9 @@ export class ApiClient {
         return {
           success: true,
           data: {
-            content: MOCK_POSTS,
+            content: MOCK_POSTS.filter((p) => p.status === "PUBLISHED"),
             totalPages: 1,
-            totalElements: MOCK_POSTS.length,
+            totalElements: MOCK_POSTS.filter((p) => p.status === "PUBLISHED").length,
             size: 10,
             number: 0,
             first: true,
@@ -243,7 +305,7 @@ export class ApiClient {
   }
 
   static async getProfile() {
-    return this.get<User>("/auth/profile")
+    return this.get<User>("/users/me")
   }
 
   static async validateToken() {
@@ -256,6 +318,10 @@ export class ApiClient {
       this.setToken(response.data)
     }
     return response
+  }
+
+  static async updateProfile(data: { displayName?: string; email?: string; username?: string; avatar?: string }) {
+    return this.put<User>("/users/me", data)
   }
 
   static isAuthenticated(): boolean {
@@ -273,12 +339,30 @@ export class ApiClient {
     return this.get<PageResponse<Post>>(`/posts${query ? `?${query}` : ""}`)
   }
 
+  static async getAdminPosts(params?: { page?: number; size?: number; sort?: string }) {
+    const queryParams = new URLSearchParams()
+    if (params?.page !== undefined) queryParams.append("page", params.page.toString())
+    if (params?.size !== undefined) queryParams.append("size", params.size.toString())
+    if (params?.sort) queryParams.append("sort", params.sort)
+
+    const query = queryParams.toString()
+    return this.get<PageResponse<Post>>(`/posts/admin/all${query ? `?${query}` : ""}`)
+  }
+
   static async getPostById(id: number) {
     return this.get<Post>(`/posts/${id}`)
   }
 
+  static async getAdminPostById(id: number) {
+    return this.get<Post>(`/posts/admin/${id}`)
+  }
+
   static async getPostBySlug(slug: string) {
     return this.get<Post>(`/posts/slug/${slug}`)
+  }
+
+  static async getAdminPostBySlug(slug: string) {
+    return this.get<Post>(`/posts/admin/slug/${slug}`)
   }
 
   static async searchPosts(params: {
@@ -298,6 +382,25 @@ export class ApiClient {
     if (params.sort) queryParams.append("sort", params.sort)
 
     return this.get<PageResponse<Post>>(`/posts/search?${queryParams.toString()}`)
+  }
+
+  static async searchAdminPosts(params: {
+    q?: string
+    category?: number
+    tag?: number
+    page?: number
+    size?: number
+    sort?: string
+  }) {
+    const queryParams = new URLSearchParams()
+    if (params.q) queryParams.append("q", params.q)
+    if (params.category) queryParams.append("category", params.category.toString())
+    if (params.tag) queryParams.append("tag", params.tag.toString())
+    if (params.page !== undefined) queryParams.append("page", params.page.toString())
+    if (params.size !== undefined) queryParams.append("size", params.size.toString())
+    if (params.sort) queryParams.append("sort", params.sort)
+
+    return this.get<PageResponse<Post>>(`/posts/admin/search?${queryParams.toString()}`)
   }
 
   static async createPost(data: {
@@ -558,6 +661,7 @@ export interface User {
   id: number
   username: string
   email: string
+  displayName?: string
   nickname: string
   role: "ADMIN" | "USER"
   avatar: string

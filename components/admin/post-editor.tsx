@@ -101,7 +101,7 @@ export function PostEditor({ postId }: PostEditorProps) {
         }
 
         if (postId) {
-          const postRes = await ApiClient.get<Post>(`/posts/${postId}`)
+          const postRes = await ApiClient.getAdminPostById(postId)
           if (postRes.success && postRes.data) {
             const post = postRes.data
             setTitle(post.title)

@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
+import { Github, LayoutDashboard } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
+import { useBlogSettings } from "@/hooks/use-blog-settings"
 import { ThemeToggle } from "./theme-toggle"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { LayoutDashboard, Github } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ import {
 
 export function BlogHeader() {
   const { user, isAuthenticated, logout } = useAuth()
+  const { settings } = useBlogSettings()
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 pt-8 pb-4">
@@ -24,8 +26,8 @@ export function BlogHeader() {
         <div className="flex items-center justify-between">
           {/* Left: Title and Subtitle */}
           <Link href="/" className="flex flex-col">
-            <h1 className="text-2xl font-bold tracking-tight">Kana</h1>
-            <p className="text-xs text-muted-foreground">自强不息，知行合一。</p>
+            <h1 className="text-2xl font-bold tracking-tight">{settings.blogName || "KonataBlog"}</h1>
+            <p className="text-xs text-muted-foreground">{settings.blogDescription || "记录与分享"}</p>
           </Link>
 
           {/* Right: Navigation */}

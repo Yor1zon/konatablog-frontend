@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
@@ -36,7 +35,7 @@ export default function AdminDashboardPage() {
     const fetchDashboardData = async () => {
       try {
         const [postsRes, categoriesRes, tagsRes] = await Promise.all([
-          ApiClient.get<PageResponse<Post>>("/posts?page=0&size=100"),
+          ApiClient.getAdminPosts({ page: 0, size: 100, sort: "createdAt,desc" }),
           ApiClient.get<Category[]>("/categories"),
           ApiClient.get<Tag[]>("/tags"),
         ])
@@ -109,7 +108,6 @@ export default function AdminDashboardPage() {
     name: "",
     slug: "",
     description: "",
-    isActive: true,
   }
   const [categories, setCategories] = useState<Category[]>([])
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
@@ -144,7 +142,6 @@ export default function AdminDashboardPage() {
       name: category.name,
       slug: category.slug || "",
       description: category.description || "",
-      isActive: category.isActive ?? true,
     })
     setIsCategoryDialogOpen(true)
   }
@@ -252,7 +249,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Categories Management Section */}
-        <div className="space-y-6">
+      <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-semibold">分类管理</h3>
@@ -276,7 +273,6 @@ export default function AdminDashboardPage() {
                     <TableHead>分类</TableHead>
                     <TableHead>路径</TableHead>
                     <TableHead>文章数量</TableHead>
-                    <TableHead>状态</TableHead>
                     <TableHead className="text-right">操作</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -289,11 +285,6 @@ export default function AdminDashboardPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">{category.postCount || 0}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={category.isActive ? "default" : "outline"}>
-                          {category.isActive ? "启用" : "停用"}
-                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -352,16 +343,6 @@ export default function AdminDashboardPage() {
                   onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
                   placeholder="输入分类描述（可选）"
                   rows={3}
-                />
-              </div>
-              <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-4">
-                <div>
-                  <p className="font-medium text-sm">启用状态</p>
-                  <p className="text-xs text-muted-foreground">停用后该分类将不会在前台显示。</p>
-                </div>
-                <Switch
-                  checked={categoryForm.isActive}
-                  onCheckedChange={(checked) => setCategoryForm({ ...categoryForm, isActive: checked })}
                 />
               </div>
               <div className="flex justify-end gap-2">

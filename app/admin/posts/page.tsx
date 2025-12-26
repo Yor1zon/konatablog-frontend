@@ -29,11 +29,17 @@ export default function AdminPostsPage() {
     setIsLoading(true)
     setError(null)
     try {
-      const endpoint = searchQuery
-        ? `/posts/search?q=${encodeURIComponent(searchQuery)}&page=${currentPage}&size=10`
-        : `/posts?page=${currentPage}&size=10&sort=createdAt,desc`
-
-      const response = await ApiClient.get<PageResponse<Post>>(endpoint)
+      const response = searchQuery
+        ? await ApiClient.searchAdminPosts({
+            q: searchQuery,
+            page: currentPage,
+            size: 10,
+          })
+        : await ApiClient.getAdminPosts({
+            page: currentPage,
+            size: 10,
+            sort: "createdAt,desc",
+          })
       if (response.success && response.data) {
         setPosts(response.data.content)
         setTotalPages(response.data.totalPages)

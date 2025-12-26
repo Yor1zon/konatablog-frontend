@@ -20,6 +20,11 @@ export default function PostDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const getAuthorName = (post: Post | null) => {
+    if (!post?.author) return "Unknown author"
+    return post.author.username || post.author.displayName || "Unknown author"
+  }
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -75,7 +80,7 @@ export default function PostDetailPage() {
     )
   }
 
-  const authorName = post.author?.username
+  const authorName = getAuthorName(post)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -103,9 +108,9 @@ export default function PostDetailPage() {
               </span>
               <span className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />
-                {post.viewCount} views
+                {(post.viewCount ?? 0).toLocaleString()} views
               </span>
-              <span>By {post.author.displayName}</span>
+              <span>By {authorName}</span>
             </div>
 
             {post.tags.length > 0 && (

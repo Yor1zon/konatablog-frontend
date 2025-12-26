@@ -30,7 +30,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Save, Upload } from "lucide-react"
 
@@ -75,8 +74,14 @@ export default function AdminSettingsPage() {
     authorName: "",
     authorEmail: "",
     pageSize: 10,
-    commentEnabled: true,
+    commentEnabled: false,
     theme: "default",
+  })
+
+  const [profile, setProfile] = useState({
+    displayName: user?.displayName || user?.nickname || "",
+    email: user?.email || "",
+    username: user?.username || "",
   })
 
   const fetchSettings = async () => {
@@ -96,7 +101,12 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     fetchSettings()
-  }, [])
+    setProfile({
+      displayName: user?.displayName || user?.nickname || "",
+      email: user?.email || "",
+      username: user?.username || "",
+    })
+  }, [user])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -120,8 +130,28 @@ export default function AdminSettingsPage() {
   }
 
   const handleProfileSave = async () => {
-    await handleSave()
-    setIsProfileDialogOpen(false)
+    try {
+      const res = await ApiClient.updateProfile({
+        displayName: profile.displayName,
+        email: profile.email,
+        username: profile.username,
+      })
+      if (!res.success) throw new Error(res.message || "更新用户信息失败")
+      setProfile({
+        displayName: res.data?.displayName || res.data?.nickname || "",
+        email: res.data?.email || "",
+        username: res.data?.username || "",
+      })
+      await refreshUser()
+      toast({ title: "成功", description: "用户信息已更新" })
+      setIsProfileDialogOpen(false)
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "错误",
+        description: err instanceof Error ? err.message : "更新用户信息失败",
+      })
+    }
   }
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +183,7 @@ export default function AdminSettingsPage() {
 
     setIsUploadingAvatar(true)
     try {
-      const response = await ApiClient.uploadFile<{ avatarUrl: string }>("/settings/avatar", file)
+      const response = await ApiClient.uploadFile<{ avatarUrl: string }>("/users/me/avatar", file)
       if (response.success) {
         toast({
           title: "成功",
@@ -267,9 +297,19 @@ export default function AdminSettingsPage() {
                       <Label htmlFor="profileName">用户昵称</Label>
                       <Input
                         id="profileName"
-                        value={settings.authorName}
-                        onChange={(e) => setSettings({ ...settings, authorName: e.target.value })}
+                        value={profile.displayName}
+                        onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
                         placeholder="泉此方"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="profileUsername">用户名</Label>
+                      <Input
+                        id="profileUsername"
+                        value={profile.username}
+                        onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+                        placeholder="konata"
                         className="mt-1"
                       />
                     </div>
@@ -278,21 +318,10 @@ export default function AdminSettingsPage() {
                       <Input
                         id="profileEmail"
                         type="email"
-                        value={settings.authorEmail}
-                        onChange={(e) => setSettings({ ...settings, authorEmail: e.target.value })}
+                        value={profile.email}
+                        onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                         placeholder="konata@example.com"
                         className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="profileTagline">一句话签名</Label>
-                      <Textarea
-                        id="profileTagline"
-                        value={settings.blogTagline}
-                        onChange={(e) => setSettings({ ...settings, blogTagline: e.target.value })}
-                        placeholder="记录灵感，分享所见"
-                        className="mt-1"
-                        rows={3}
                       />
                     </div>
                   </div>
@@ -315,10 +344,10 @@ export default function AdminSettingsPage() {
 
             <div className="text-center md:text-left space-y-2">
               <p className="text-2xl font-semibold">
-                {settings.authorName || user?.nickname || "未命名用户"}
+                {profile.displayName || user?.displayName || user?.nickname || "未命名用户"}
               </p>
               <p className="text-sm text-muted-foreground">
-                {settings.authorEmail || user?.email || "尚未设置邮箱"}
+                {profile.email || user?.email || "尚未设置邮箱"}
               </p>
               <p className="text-sm text-slate-500">
                 {settings.blogTagline ? `“${settings.blogTagline}”` : "点击头像更新个性签名"}
@@ -377,14 +406,14 @@ export default function AdminSettingsPage() {
                 rows={4}
               />
             </div>
-            <div className="flex items-center justify-between rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-4">
-              <div>
-                <p className="font-medium">启用评论</p>
-                <p className="text-sm text-muted-foreground">允许读者在文章下留言互动。</p>
-              </div>
-              <Switch
-                checked={settings.commentEnabled}
-                onCheckedChange={(checked) => setSettings({ ...settings, commentEnabled: checked })}
+            <div>
+              <Label htmlFor="blogTagline">博客标语</Label>
+              <Input
+                id="blogTagline"
+                value={settings.blogTagline}
+                onChange={(e) => setSettings({ ...settings, blogTagline: e.target.value })}
+                placeholder="记录灵感，分享所见"
+                className="mt-1"
               />
             </div>
           </CardContent>
