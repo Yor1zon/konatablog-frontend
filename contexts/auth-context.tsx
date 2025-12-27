@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useCallback } from "react"
 import { ApiClient, type User } from "@/lib/api"
 
 interface AuthContextType {
@@ -17,10 +17,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const refreshUser = async () => {
-    if (!ApiClient.isAuthenticated()) {
+  const refreshUser = useCallback(async () => {
+    const hasToken = ApiClient.isAuthenticated()
+    setIsAuthenticated(hasToken)
+
+    if (!hasToken) {
       setUser(null)
       setIsLoading(false)
       return
@@ -31,19 +35,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.success && response.data) {
         setUser(response.data)
       } else {
-        setUser(null)
+        const errorCode = response.error?.code
+        if (errorCode === "401" || errorCode === "UNAUTHORIZED" || errorCode === "INVALID_TOKEN") {
+          const validation = await ApiClient.validateToken()
+          const tokenStillValid = validation.success && validation.data === true
+          if (!tokenStillValid) {
+            await ApiClient.logout()
+            setUser(null)
+            setIsAuthenticated(false)
+          }
+        }
       }
     } catch (error) {
       console.error("[v0] Failed to fetch user profile:", error)
-      setUser(null)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     refreshUser()
-  }, [])
+  }, [refreshUser])
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== "auth_token") return
+      setIsLoading(true)
+      refreshUser()
+    }
+
+    window.addEventListener("storage", handleStorage)
+    return () => window.removeEventListener("storage", handleStorage)
+  }, [refreshUser])
+
+  useEffect(() => {
+    const handleTokenEvent = () => {
+      setIsLoading(true)
+      refreshUser()
+    }
+
+    window.addEventListener("konatablog:auth_token_changed", handleTokenEvent)
+    return () => window.removeEventListener("konatablog:auth_token_changed", handleTokenEvent)
+  }, [refreshUser])
 
   const login = async (username: string, password: string) => {
     setIsLoading(true)
@@ -51,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await ApiClient.login(username, password)
       if (response.success && response.data) {
         setUser(response.data.user)
+        setIsAuthenticated(true)
       } else {
         throw new Error(response.error?.message || "Login failed")
       }
@@ -65,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await ApiClient.logout()
     } finally {
       setUser(null)
+      setIsAuthenticated(false)
       setIsLoading(false)
     }
   }
@@ -73,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        isAuthenticated,
         isLoading,
         login,
         logout,

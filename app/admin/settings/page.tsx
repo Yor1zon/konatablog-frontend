@@ -8,7 +8,6 @@ import { ApiClient, type BlogSettings } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Spinner } from "@/components/ui/spinner"
 import { useToast } from "@/hooks/use-toast"
@@ -62,7 +61,9 @@ export default function AdminSettingsPage() {
   const { user, refreshUser } = useAuth()
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isSavingBlogSettings, setIsSavingBlogSettings] = useState(false)
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [isSavingTheme, setIsSavingTheme] = useState(false)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false)
@@ -79,9 +80,10 @@ export default function AdminSettingsPage() {
   })
 
   const [profile, setProfile] = useState({
-    displayName: user?.displayName || user?.nickname || "",
+    nickname: user?.nickname || user?.displayName || "",
     email: user?.email || "",
     username: user?.username || "",
+    password: "",
   })
 
   const fetchSettings = async () => {
@@ -102,17 +104,19 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     fetchSettings()
     setProfile({
-      displayName: user?.displayName || user?.nickname || "",
+      nickname: user?.nickname || user?.displayName || "",
       email: user?.email || "",
       username: user?.username || "",
+      password: "",
     })
   }, [user])
 
-  const handleSave = async () => {
-    setIsSaving(true)
+  const handleBlogSettingsSave = async () => {
+    setIsSavingBlogSettings(true)
     try {
       const response = await ApiClient.put<BlogSettings>("/settings", settings)
       if (response.success) {
+        await fetchSettings()
         toast({
           title: "成功",
           description: "设置已保存",
@@ -125,22 +129,48 @@ export default function AdminSettingsPage() {
         description: err instanceof Error ? err.message : "保存设置失败",
       })
     } finally {
-      setIsSaving(false)
+      setIsSavingBlogSettings(false)
+    }
+  }
+
+  const handleThemeActivate = async (themeSlug: string) => {
+    setIsSavingTheme(true)
+    try {
+      const nextSettings = { ...settings, theme: themeSlug }
+      setSettings(nextSettings)
+      const response = await ApiClient.put<BlogSettings>("/settings", nextSettings)
+      if (response.success) {
+        await fetchSettings()
+        toast({ title: "成功", description: "主题已应用" })
+      } else {
+        throw new Error(response.error?.message || response.message || "主题保存失败")
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "错误",
+        description: err instanceof Error ? err.message : "主题保存失败",
+      })
+    } finally {
+      setIsSavingTheme(false)
     }
   }
 
   const handleProfileSave = async () => {
+    setIsSavingProfile(true)
     try {
       const res = await ApiClient.updateProfile({
-        displayName: profile.displayName,
+        nickname: profile.nickname,
         email: profile.email,
         username: profile.username,
+        password: profile.password || undefined,
       })
-      if (!res.success) throw new Error(res.message || "更新用户信息失败")
+      if (!res.success) throw new Error(res.error?.message || res.message || "更新用户信息失败")
       setProfile({
-        displayName: res.data?.displayName || res.data?.nickname || "",
-        email: res.data?.email || "",
-        username: res.data?.username || "",
+        nickname: res.data?.nickname || profile.nickname,
+        email: res.data?.email || profile.email,
+        username: res.data?.username || profile.username,
+        password: "",
       })
       await refreshUser()
       toast({ title: "成功", description: "用户信息已更新" })
@@ -151,6 +181,8 @@ export default function AdminSettingsPage() {
         title: "错误",
         description: err instanceof Error ? err.message : "更新用户信息失败",
       })
+    } finally {
+      setIsSavingProfile(false)
     }
   }
 
@@ -183,13 +215,13 @@ export default function AdminSettingsPage() {
 
     setIsUploadingAvatar(true)
     try {
-      const response = await ApiClient.uploadFile<{ avatarUrl: string }>("/users/me/avatar", file)
+      const response = await ApiClient.uploadAvatar(file)
       if (response.success) {
         toast({
           title: "成功",
           description: "头像上传成功",
         })
-        refreshUser()
+        await refreshUser()
       }
     } catch (err) {
       toast({
@@ -233,10 +265,6 @@ export default function AdminSettingsPage() {
             <h2 className="text-3xl font-bold">设置中心</h2>
             <p className="text-muted-foreground">管理个人资料、博客配置以及主题样式。</p>
           </div>
-          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSave} disabled={isSaving}>
-            <Save className="mr-2 h-4 w-4" />
-            {isSaving ? "保存中..." : "保存更改"}
-          </Button>
         </div>
 
         <Card className="shadow-sm border-slate-200">
@@ -292,32 +320,44 @@ export default function AdminSettingsPage() {
                       <p className="text-xs text-muted-foreground">支持 JPG、PNG、GIF，最大 5MB。</p>
                     </div>
                   </div>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="profileName">用户昵称</Label>
-                      <Input
-                        id="profileName"
-                        value={profile.displayName}
-                        onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
-                        placeholder="泉此方"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="profileUsername">用户名</Label>
-                      <Input
-                        id="profileUsername"
-                        value={profile.username}
-                        onChange={(e) => setProfile({ ...profile, username: e.target.value })}
-                        placeholder="konata"
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="profileEmail">用户邮箱</Label>
-                      <Input
-                        id="profileEmail"
-                        type="email"
+	                  <div className="space-y-4">
+	                    <div>
+	                      <Label htmlFor="profileName">用户昵称</Label>
+	                      <Input
+	                        id="profileName"
+	                        value={profile.nickname}
+	                        onChange={(e) => setProfile({ ...profile, nickname: e.target.value })}
+	                        placeholder="konatabloger"
+	                        className="mt-1"
+	                      />
+	                    </div>
+	                    <div>
+	                      <Label htmlFor="profileUsername">用户名</Label>
+	                      <Input
+	                        id="profileUsername"
+	                        value={profile.username}
+	                        onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+	                        placeholder="konata"
+	                        className="mt-1"
+	                      />
+	                    </div>
+	                    <div>
+	                      <Label htmlFor="profilePassword">密码</Label>
+	                      <Input
+	                        id="profilePassword"
+	                        type="password"
+	                        value={profile.password}
+	                        onChange={(e) => setProfile({ ...profile, password: e.target.value })}
+	                        placeholder="不修改请留空"
+	                        className="mt-1"
+	                      />
+	                      <p className="mt-1 text-xs text-muted-foreground">填写新密码将直接更新密码。</p>
+	                    </div>
+	                    <div>
+	                      <Label htmlFor="profileEmail">用户邮箱</Label>
+	                      <Input
+	                        id="profileEmail"
+	                        type="email"
                         value={profile.email}
                         onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                         placeholder="konata@example.com"
@@ -333,10 +373,10 @@ export default function AdminSettingsPage() {
                   <Button
                     className="bg-slate-900 text-white hover:bg-slate-800"
                     onClick={handleProfileSave}
-                    disabled={isSaving}
+                    disabled={isSavingProfile}
                   >
                     <Save className="mr-2 h-4 w-4" />
-                    {isSaving ? "保存中..." : "保存资料"}
+                    {isSavingProfile ? "保存中..." : "保存资料"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -344,13 +384,13 @@ export default function AdminSettingsPage() {
 
             <div className="text-center md:text-left space-y-2">
               <p className="text-2xl font-semibold">
-                {profile.displayName || user?.displayName || user?.nickname || "未命名用户"}
+                {profile.nickname || user?.nickname || user?.displayName || "未命名用户"}
               </p>
               <p className="text-sm text-muted-foreground">
                 {profile.email || user?.email || "尚未设置邮箱"}
               </p>
               <p className="text-sm text-slate-500">
-                {settings.blogTagline ? `“${settings.blogTagline}”` : "点击头像更新个性签名"}
+                {settings.blogDescription ? `“${settings.blogDescription}”` : "点击头像更新个人信息"}
               </p>
             </div>
           </CardContent>
@@ -359,11 +399,21 @@ export default function AdminSettingsPage() {
           </CardFooter>
         </Card>
 
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader>
-            <CardTitle>博客设置</CardTitle>
-            <CardDescription>配置站点基本信息与展示行为。</CardDescription>
-          </CardHeader>
+	        <Card className="shadow-sm border-slate-200">
+	          <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+	            <div className="space-y-1.5">
+	              <CardTitle>博客设置</CardTitle>
+	              <CardDescription>配置站点基本信息与展示行为。</CardDescription>
+	            </div>
+	            <Button
+	              className="bg-slate-900 text-white hover:bg-slate-800"
+	              onClick={handleBlogSettingsSave}
+	              disabled={isSavingBlogSettings}
+	            >
+	              <Save className="mr-2 h-4 w-4" />
+	              {isSavingBlogSettings ? "保存中..." : "保存更改"}
+	            </Button>
+	          </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div>
@@ -395,27 +445,26 @@ export default function AdminSettingsPage() {
                 <p className="text-xs text-muted-foreground mt-1">建议 6-20 之间，保障加载速度。</p>
               </div>
             </div>
-            <div>
-              <Label htmlFor="blogDescription">博客简介</Label>
-              <Textarea
-                id="blogDescription"
-                value={settings.blogDescription}
-                onChange={(e) => setSettings({ ...settings, blogDescription: e.target.value })}
-                placeholder="说明博客关注的主题、节奏或读者期待。"
-                className="mt-1"
-                rows={4}
-              />
-            </div>
-            <div>
-              <Label htmlFor="blogTagline">博客标语</Label>
-              <Input
-                id="blogTagline"
-                value={settings.blogTagline}
-                onChange={(e) => setSettings({ ...settings, blogTagline: e.target.value })}
-                placeholder="记录灵感，分享所见"
-                className="mt-1"
-              />
-            </div>
+	            <div>
+	              <Label htmlFor="blogDescription">博客标语</Label>
+	              <Input
+	                id="blogDescription"
+	                value={settings.blogDescription}
+	                onChange={(e) => setSettings({ ...settings, blogDescription: e.target.value })}
+	                placeholder="记录与分享"
+	                className="mt-1"
+	              />
+	            </div>
+	            <div>
+	              <Label htmlFor="blogTagline">浏览器标签</Label>
+	              <Input
+	                id="blogTagline"
+	                value={settings.blogTagline}
+	                onChange={(e) => setSettings({ ...settings, blogTagline: e.target.value })}
+	                placeholder={settings.blogName || "KonataBlog"}
+	                className="mt-1"
+	              />
+	            </div>
           </CardContent>
         </Card>
 
@@ -445,14 +494,14 @@ export default function AdminSettingsPage() {
                       </div>
                       {isActive && <Badge>当前主题</Badge>}
                     </div>
-                    <Button
-                      variant={isActive ? "outline" : "default"}
-                      className={`mt-4 w-full ${!isActive ? "bg-slate-900 text-white hover:bg-slate-800" : ""}`}
-                      disabled={isActive}
-                      onClick={() => setSettings({ ...settings, theme: theme.slug })}
-                    >
-                      {isActive ? "已启用" : "启用主题"}
-                    </Button>
+	                    <Button
+	                      variant={isActive ? "outline" : "default"}
+	                      className={`mt-4 w-full ${!isActive ? "bg-slate-900 text-white hover:bg-slate-800" : ""}`}
+	                      disabled={isActive || isSavingTheme}
+	                      onClick={() => handleThemeActivate(theme.slug)}
+	                    >
+	                      {isActive ? "已启用" : isSavingTheme ? "保存中..." : "启用主题"}
+	                    </Button>
                   </div>
                 )
               })}

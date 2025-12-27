@@ -17,7 +17,7 @@ import {
 } from "./ui/dropdown-menu"
 
 export function BlogHeader() {
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, isLoading, logout } = useAuth()
   const { settings } = useBlogSettings()
 
   return (
@@ -32,21 +32,21 @@ export function BlogHeader() {
 
           {/* Right: Navigation */}
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            {isAuthenticated ? (
+            {isLoading ? null : isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.nickname} />
-                      <AvatarFallback>{user?.nickname?.[0] || "A"}</AvatarFallback>
+                      <AvatarFallback>{user?.nickname?.[0] || user?.username?.[0] || "U"}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{user?.nickname}</p>
-                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                      <p className="text-sm font-medium">{user?.nickname || user?.username || "Account"}</p>
+                      <p className="text-xs text-muted-foreground">{user?.email || ""}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />

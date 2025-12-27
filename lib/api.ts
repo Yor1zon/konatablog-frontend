@@ -19,30 +19,94 @@ export interface ApiResponse<T> {
 }
 
 export class ApiClient {
-  private static getToken(): string | null {
+  private static refreshPromise: Promise<boolean> | null = null
+
+  private static authTokenEventName = "konatablog:auth_token_changed"
+
+  private static notifyTokenChanged(): void {
+    if (typeof window === "undefined") return
+    window.dispatchEvent(new Event(this.authTokenEventName))
+  }
+
+  private static isAuthEndpoint(endpoint: string): boolean {
+    return (
+      endpoint === "/auth/login" ||
+      endpoint === "/auth/logout" ||
+      endpoint === "/auth/refresh" ||
+      endpoint === "/auth/validate"
+    )
+  }
+
+  private static async tryRefreshToken(): Promise<boolean> {
+    if (this.refreshPromise) return this.refreshPromise
+
+    this.refreshPromise = (async () => {
+      try {
+        const response = await this.refreshToken()
+        return !!(response.success && response.data)
+      } catch {
+        return false
+      } finally {
+        this.refreshPromise = null
+      }
+    })()
+
+    return this.refreshPromise
+  }
+
+  private static getStoredToken(): string | null {
     if (typeof window === "undefined") return null
-    return localStorage.getItem("auth_token")
+    const token = localStorage.getItem("auth_token")?.trim()
+    return token ? token : null
   }
 
   private static setToken(token: string): void {
     if (typeof window === "undefined") return
-    localStorage.setItem("auth_token", token)
+    localStorage.setItem("auth_token", token.trim())
+    this.notifyTokenChanged()
   }
 
   private static removeToken(): void {
     if (typeof window === "undefined") return
     localStorage.removeItem("auth_token")
+    this.notifyTokenChanged()
   }
 
-  private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-    const token = this.getToken()
+  private static stripBearerPrefix(token: string): string {
+    return token.replace(/^Bearer\s+/i, "").trim()
+  }
+
+  private static buildAuthHeader(token: string, variant: "bearer" | "raw"): string {
+    if (variant === "raw") return this.stripBearerPrefix(token)
+    const trimmed = token.trim()
+    if (/^Bearer\s+/i.test(trimmed)) return trimmed
+    return `Bearer ${trimmed}`
+  }
+
+  private static async request<T>(
+    endpoint: string,
+    options: RequestInit = {},
+    meta: {
+      refreshed?: boolean
+      authVariant?: "bearer" | "raw"
+      suppressAuthClear?: boolean
+      skipRefresh?: boolean
+    } = {},
+  ): Promise<ApiResponse<T>> {
+    const storedToken = this.getStoredToken()
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...options.headers as Record<string, string>,
+      ...(options.headers as Record<string, string>),
     }
 
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`
+    const hasBody = options.body !== undefined && options.body !== null
+    const isFormDataBody = typeof FormData !== "undefined" && options.body instanceof FormData
+    if (hasBody && !isFormDataBody && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json"
+    }
+
+    const authVariant = meta.authVariant ?? "bearer"
+    if (storedToken) {
+      headers["Authorization"] = this.buildAuthHeader(storedToken, authVariant)
     }
 
     try {
@@ -51,13 +115,58 @@ export class ApiClient {
         headers,
       })
 
-      const data: ApiResponse<T> = await response.json()
+      let data: ApiResponse<T> | null = null
+      const contentType = response.headers.get("content-type") || ""
+      if (contentType.includes("application/json")) {
+        try {
+          data = (await response.json()) as ApiResponse<T>
+        } catch {
+          data = null
+        }
+      }
+
+      if (!data) {
+        data = { success: response.ok, data: null } as ApiResponse<T>
+      }
 
       if (!response.ok) {
         if (response.status === 401) {
-          this.removeToken()
+          if (!meta.skipRefresh && !meta.refreshed && storedToken && !this.isAuthEndpoint(endpoint)) {
+            const refreshed = await this.tryRefreshToken()
+            if (refreshed) {
+              return this.request<T>(endpoint, options, { ...meta, refreshed: true })
+            }
+          }
+
+          if (!meta.suppressAuthClear) {
+            try {
+              if (storedToken && !this.isAuthEndpoint(endpoint)) {
+                const validation = await this.request<boolean>(
+                  "/auth/validate",
+                  { method: "GET" },
+                  { suppressAuthClear: true, skipRefresh: true, authVariant },
+                )
+                const tokenStillValid = validation.success && validation.data === true
+                if (!tokenStillValid) {
+                  this.removeToken()
+                }
+              } else {
+                this.removeToken()
+              }
+            } catch {
+              // If we can't validate the token (network/transient failure), avoid force-logging out.
+            }
+          }
         }
-        throw new Error(data.error?.message || "Request failed")
+
+        return {
+          success: false,
+          data: null,
+          error: {
+            code: data.error?.code || response.status.toString(),
+            message: data.error?.message || data.message || response.statusText || "Request failed",
+          },
+        }
       }
 
       return data
@@ -86,22 +195,6 @@ export class ApiClient {
         throw new Error("Invalid credentials")
       }
 
-      if (endpoint === "/users/me") {
-        return {
-          success: true,
-          data: {
-            id: 1,
-            username: "admin",
-            email: "admin@example.com",
-            displayName: "Admin User",
-            nickname: "Admin User",
-            role: "ADMIN",
-            avatar: "/placeholder.svg",
-            isActive: true,
-          } as any,
-        }
-      }
-
       if (endpoint === "/auth/validate") {
         return {
           success: true,
@@ -109,7 +202,7 @@ export class ApiClient {
         }
       }
 
-      if (endpoint === "/users/me" && options.method === "PUT") {
+      if (endpoint === "/auth/profile" && options.method === "PUT") {
         const body = options.body ? JSON.parse(options.body as string) : {}
         return {
           success: true,
@@ -118,7 +211,23 @@ export class ApiClient {
             username: body.username || "admin",
             email: body.email || "admin@example.com",
             displayName: body.displayName || "Admin User",
-            nickname: body.displayName || "Admin User",
+            nickname: body.nickname || "Admin User",
+            role: "ADMIN",
+            avatar: "/placeholder.svg",
+            isActive: true,
+          } as any,
+        }
+      }
+
+      if (endpoint === "/auth/profile") {
+        return {
+          success: true,
+          data: {
+            id: 1,
+            username: "admin",
+            email: "admin@example.com",
+            displayName: "Admin User",
+            nickname: "Admin User",
             role: "ADMIN",
             avatar: "/placeholder.svg",
             isActive: true,
@@ -247,10 +356,11 @@ export class ApiClient {
     endpoint: string,
     file: File,
     additionalData?: Record<string, string>,
+    fieldName = "file",
   ): Promise<ApiResponse<T>> {
-    const token = this.getToken()
+    const token = this.getStoredToken()
     const formData = new FormData()
-    formData.append("file", file)
+    formData.append(fieldName, file)
 
     if (additionalData) {
       Object.entries(additionalData).forEach(([key, value]) => {
@@ -260,7 +370,7 @@ export class ApiClient {
 
     const headers: Record<string, string> = {}
     if (token) {
-      headers["Authorization"] = `Bearer ${token}`
+      headers["Authorization"] = this.buildAuthHeader(token, "bearer")
     }
 
     try {
@@ -305,7 +415,7 @@ export class ApiClient {
   }
 
   static async getProfile() {
-    return this.get<User>("/users/me")
+    return this.get<User>("/auth/profile")
   }
 
   static async validateToken() {
@@ -313,19 +423,37 @@ export class ApiClient {
   }
 
   static async refreshToken() {
-    const response = await this.post<string>("/auth/refresh")
+    const response = await this.request<string>("/auth/refresh", { method: "POST" }, { suppressAuthClear: true, skipRefresh: true })
     if (response.success && response.data) {
       this.setToken(response.data)
     }
     return response
   }
 
-  static async updateProfile(data: { displayName?: string; email?: string; username?: string; avatar?: string }) {
-    return this.put<User>("/users/me", data)
+  static async updateProfile(data: { nickname?: string; email?: string; username?: string; password?: string }) {
+    const attempt = async (endpoint: string) =>
+      this.request<any>(endpoint, { method: "PUT", body: JSON.stringify(data) }, { suppressAuthClear: true })
+
+    let response = await attempt("/auth/profile")
+    const code = response.error?.code
+    if (!response.success && (code === "UNAUTHORIZED" || code === "401" || code === "404" || code === "405")) {
+      response = await attempt("/users/me")
+    }
+
+    if (response.success && response.data) {
+      const maybeToken = response.data?.token
+      if (typeof maybeToken === "string" && maybeToken) {
+        this.setToken(maybeToken)
+      }
+
+      const user = response.data?.user ?? response.data
+      return { ...response, data: user as User } as ApiResponse<User>
+    }
+    return response as ApiResponse<User>
   }
 
   static isAuthenticated(): boolean {
-    return !!this.getToken()
+    return !!this.getStoredToken()
   }
 
   // Posts methods
@@ -640,7 +768,7 @@ export class ApiClient {
   }
 
   static async uploadAvatar(file: File) {
-    return this.uploadFile<{ avatarUrl: string }>("/settings/avatar", file)
+    return this.uploadFile<{ avatarUrl: string }>("/settings/avatar", file, undefined, "avatar")
   }
 
   // Theme methods
