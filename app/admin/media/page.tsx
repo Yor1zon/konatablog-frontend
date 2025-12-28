@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { AdminLayout } from "@/components/admin/admin-layout"
 import { ApiClient, type MediaFile, type PageResponse } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -136,14 +135,13 @@ export default function AdminMediaPage() {
   const filteredMedia = media.filter((file) => file.originalName.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold">Media Library</h2>
             <p className="text-muted-foreground">Manage your images and files</p>
           </div>
-          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
             <Upload className="mr-2 h-4 w-4" />
             {isUploading ? "Uploading..." : "Upload File"}
           </Button>
@@ -238,6 +236,5 @@ export default function AdminMediaPage() {
           </>
         )}
       </div>
-    </AdminLayout>
   )
 }

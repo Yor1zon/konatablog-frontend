@@ -4,21 +4,26 @@ import type React from "react"
 
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { BlogHeader } from "@/components/blog-header"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
+  const [hasResolvedAuth, setHasResolvedAuth] = useState(() => !isLoading)
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login")
-    }
-  }, [isLoading, isAuthenticated, router])
+    if (!isLoading) setHasResolvedAuth(true)
+  }, [isLoading])
 
-  if (isLoading) {
+  useEffect(() => {
+    if (hasResolvedAuth && !isAuthenticated) {
+      router.replace("/login")
+    }
+  }, [hasResolvedAuth, isAuthenticated, router])
+
+  if (!hasResolvedAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />

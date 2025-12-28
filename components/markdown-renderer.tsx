@@ -55,7 +55,7 @@ const markdownComponents: Components = {
   },
   blockquote({ children, ...props }) {
     return (
-      <blockquote className="border-l-gray-400 border-l-2 pl-4 my-6 text-gray-600 italic max-w-[75%]" {...props}>
+      <blockquote className="border-l-border border-l-2 pl-4 my-6 text-muted-foreground italic max-w-[75%]" {...props}>
         {children}
       </blockquote>
     )
@@ -150,7 +150,7 @@ const excerptComponents: Components = {
   },
   blockquote({ children, ...props }) {
     return (
-      <blockquote className="border-l-gray-400 border-l-2 pl-3 my-3 text-gray-600 italic text-sm" {...props}>
+      <blockquote className="border-l-border border-l-2 pl-3 my-3 text-muted-foreground italic text-sm" {...props}>
         {children}
       </blockquote>
     )

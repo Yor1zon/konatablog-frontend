@@ -337,7 +337,7 @@ export function PostEditor({ postId }: PostEditorProps) {
             <Save className="mr-2 h-4 w-4" />
             保存草稿
           </Button>
-          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={() => handleSave(true)} disabled={isSaving}>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => handleSave(true)} disabled={isSaving}>
             <Send className="mr-2 h-4 w-4" />
             发布
           </Button>

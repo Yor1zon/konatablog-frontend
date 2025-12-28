@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { AdminLayout } from "@/components/admin/admin-layout"
 import { ApiClient, type Post, type PageResponse } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -111,13 +110,12 @@ export default function AdminPostsPage() {
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold">文章</h2>
           </div>
-          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={() => router.push("/admin/posts/new")}>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => router.push("/admin/posts/new")}>
             <Plus className="mr-2 h-4 w-4" />
             新建文章
           </Button>
@@ -135,7 +133,7 @@ export default function AdminPostsPage() {
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
-          <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSearch}>搜索</Button>
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSearch}>搜索</Button>
         </div>
 
         {/* Table */}
@@ -226,6 +224,5 @@ export default function AdminPostsPage() {
           </>
         )}
       </div>
-    </AdminLayout>
   )
 }

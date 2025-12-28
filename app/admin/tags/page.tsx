@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { AdminLayout } from "@/components/admin/admin-layout"
 import { ApiClient, type Tag } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,16 +15,16 @@ import { useToast } from "@/hooks/use-toast"
 import { Plus, Edit, Trash2, TagIcon } from "lucide-react"
 
 const defaultColors = [
-  "#FF5722",
-  "#2196F3",
-  "#4CAF50",
-  "#FFC107",
-  "#9C27B0",
-  "#FF9800",
-  "#00BCD4",
-  "#E91E63",
-  "#3F51B5",
-  "#8BC34A",
+  "var(--tag-color-1)",
+  "var(--tag-color-2)",
+  "var(--tag-color-3)",
+  "var(--tag-color-4)",
+  "var(--tag-color-5)",
+  "var(--tag-color-6)",
+  "var(--tag-color-7)",
+  "var(--tag-color-8)",
+  "var(--tag-color-9)",
+  "var(--tag-color-10)",
 ]
 
 export default function AdminTagsPage() {
@@ -137,15 +136,14 @@ export default function AdminTagsPage() {
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold">标签</h2>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={() => handleOpenDialog()}>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => handleOpenDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
                 New Tag
               </Button>
@@ -193,7 +191,7 @@ export default function AdminTagsPage() {
                         className="h-8 w-8 rounded border-2 transition-all"
                         style={{
                           backgroundColor: color,
-                          borderColor: formData.color === color ? "#000" : "transparent",
+                          borderColor: formData.color === color ? "var(--foreground)" : "transparent",
                         }}
                         onClick={() => setFormData({ ...formData, color })}
                       />
@@ -204,7 +202,7 @@ export default function AdminTagsPage() {
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSave}>Save</Button>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSave}>Save</Button>
                 </div>
               </div>
             </DialogContent>
@@ -267,6 +265,5 @@ export default function AdminTagsPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   )
 }

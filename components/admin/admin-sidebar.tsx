@@ -7,11 +7,13 @@ import { LayoutDashboard, FileText, Tag, ImageIcon, Settings, Home, LogOut } fro
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 
+const isMediaLibraryEnabled = false
+
 const navItems = [
   { href: "/admin", icon: LayoutDashboard, label: "仪表盘" },
   { href: "/admin/posts", icon: FileText, label: "文章管理" },
   { href: "/admin/tags", icon: Tag, label: "标签管理" },
-  { href: "/admin/media", icon: ImageIcon, label: "媒体库" },
+  ...(isMediaLibraryEnabled ? [{ href: "/admin/media", icon: ImageIcon, label: "媒体库" }] : []),
   { href: "/admin/settings", icon: Settings, label: "设置" },
 ]
 
@@ -33,8 +35,8 @@ export function AdminSidebar() {
                 <div
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
-                    "text-muted-foreground hover:text-foreground hover:bg-slate-100",
-                    isActive && "bg-[#192A3D] text-[#FCFCFC] font-semibold hover:bg-[#303F50] hover:text-[#FCFCFC]",
+                    "text-muted-foreground hover:text-foreground hover:bg-muted",
+                    isActive && "bg-primary text-primary-foreground font-semibold hover:bg-primary/90 hover:text-primary-foreground",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -51,7 +53,7 @@ export function AdminSidebar() {
             <div
               className={cn(
                 "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
-                "text-muted-foreground hover:text-foreground hover:bg-slate-100",
+                "text-muted-foreground hover:text-foreground hover:bg-muted",
               )}
             >
               <Home className="h-4 w-4" />
@@ -62,7 +64,7 @@ export function AdminSidebar() {
             onClick={logout}
             className={cn(
               "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors cursor-pointer",
-              "text-muted-foreground hover:text-foreground hover:bg-slate-100",
+              "text-muted-foreground hover:text-foreground hover:bg-muted",
             )}
           >
             <LogOut className="h-4 w-4" />

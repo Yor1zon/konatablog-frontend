@@ -19,9 +19,10 @@ import {
 export function BlogHeader() {
   const { user, isAuthenticated, isLoading, logout } = useAuth()
   const { settings } = useBlogSettings()
+  const navbarAvatarSrc = "/kana-avatar.jpg"
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 pt-8 pb-4">
+    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-8 pb-4">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Left: Title and Subtitle */}
@@ -32,12 +33,19 @@ export function BlogHeader() {
 
           {/* Right: Navigation */}
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            {isLoading ? null : isAuthenticated ? (
+            {isLoading ? (
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0" disabled>
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={navbarAvatarSrc} alt="Kana avatar" />
+                  <AvatarFallback>K</AvatarFallback>
+                </Avatar>
+              </Button>
+            ) : isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.nickname} />
+                      <AvatarImage src={navbarAvatarSrc} alt={user?.nickname || user?.username || "Kana avatar"} />
                       <AvatarFallback>{user?.nickname?.[0] || user?.username?.[0] || "U"}</AvatarFallback>
                     </Avatar>
                   </Button>
@@ -63,14 +71,26 @@ export function BlogHeader() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors">
-                登录
-              </Link>
+              <Button asChild variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+                <Link href="/login" aria-label="登录">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={navbarAvatarSrc} alt="Kana avatar" />
+                    <AvatarFallback>K</AvatarFallback>
+                  </Avatar>
+                </Link>
+              </Button>
             )}
 
             <div className="flex items-center space-x-2 ml-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Github className="h-5 w-5" />
+              <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+                <a
+                  href="https://github.com/Yor1zon/konatablog"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub"
+                >
+                  <Github className="h-5 w-5" />
+                </a>
               </Button>
               <ThemeToggle />
             </div>

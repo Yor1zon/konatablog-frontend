@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { AdminLayout } from "@/components/admin/admin-layout"
 import { ApiClient, type PageResponse, type Post, type Category, type Tag } from "@/lib/api"
 import {
   FileText,
@@ -78,28 +77,28 @@ export default function AdminDashboardPage() {
       value: stats.totalPosts,
       description: `${stats.publishedPosts} 篇已发布 · ${stats.draftPosts} 篇草稿`,
       icon: FileText,
-      iconBg: "bg-gray-100 text-gray-600",
+      iconBg: "bg-muted text-muted-foreground",
     },
     {
       title: "分类",
       value: stats.totalCategories,
       description: "内容分类",
       icon: Folder,
-      iconBg: "bg-gray-100 text-gray-600",
+      iconBg: "bg-muted text-muted-foreground",
     },
     {
       title: "Tags",
       value: stats.totalTags,
       description: "相关标签",
       icon: TagIcon,
-      iconBg: "bg-gray-100 text-gray-600",
+      iconBg: "bg-muted text-muted-foreground",
     },
     {
       title: "累计浏览",
       value: stats.totalViews,
       description: "站点总访问数",
       icon: Eye,
-      iconBg: "bg-gray-100 text-gray-600",
+      iconBg: "bg-muted text-muted-foreground",
     },
   ]
 
@@ -217,11 +216,10 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-8 text-slate-900">
+    <div className="space-y-8 text-foreground">
         <div className="space-y-2">
           <h2 className="text-3xl font-semibold">仪表盘</h2>
-          <p className="text-sm text-slate-500">欢迎回来，以下是您的博客概览。</p>
+          <p className="text-sm text-muted-foreground">欢迎回来，以下是您的博客概览。</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -230,18 +228,18 @@ export default function AdminDashboardPage() {
             return (
               <div
                 key={card.title}
-                className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm flex flex-col gap-4"
+                className="rounded-2xl border border-border bg-card/90 p-6 shadow-sm flex flex-col gap-4"
               >
                 <div className="flex items-center justify-between">
                   <div className={`rounded-2xl p-3 ${card.iconBg}`}>
                     <Icon className="h-6 w-6" />
                   </div>
-                  <span className="text-xs uppercase tracking-wide text-slate-400">统计</span>
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground">统计</span>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">{card.title}</p>
-                  <p className="text-3xl font-semibold text-slate-900">{card.value}</p>
-                  <p className="text-xs text-slate-400 mt-1">{card.description}</p>
+                  <p className="text-sm text-muted-foreground">{card.title}</p>
+                  <p className="text-3xl font-semibold text-foreground">{card.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
                 </div>
               </div>
             )
@@ -281,7 +279,7 @@ export default function AdminDashboardPage() {
                     <TableRow key={category.id}>
                       <TableCell className="font-medium">{category.name}</TableCell>
                       <TableCell>
-                        <code className="rounded bg-slate-100 px-2 py-1 text-xs">{category.slug}</code>
+                        <code className="rounded bg-muted px-2 py-1 text-xs">{category.slug}</code>
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">{category.postCount || 0}</Badge>
@@ -295,7 +293,7 @@ export default function AdminDashboardPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeleteCategory(category.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive/90"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -349,7 +347,7 @@ export default function AdminDashboardPage() {
                 <Button variant="outline" onClick={() => setIsCategoryDialogOpen(false)}>
                   取消
                 </Button>
-                <Button className="bg-slate-900 text-white hover:bg-slate-800" onClick={handleSaveCategory}>
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSaveCategory}>
                   {editingCategory ? "更新分类" : "创建分类"}
                 </Button>
               </div>
@@ -357,6 +355,5 @@ export default function AdminDashboardPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
   )
 }

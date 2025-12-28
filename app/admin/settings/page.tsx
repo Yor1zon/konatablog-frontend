@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { AdminLayout } from "@/components/admin/admin-layout"
 import { ApiClient, type BlogSettings } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -57,8 +56,11 @@ const themeOptions = [
 ]
 
 export default function AdminSettingsPage() {
+  const isAvatarUploadEnabled = false
+
   const { toast } = useToast()
   const { user, refreshUser } = useAuth()
+  const userAvatarSrc = "/kana-avatar.jpg"
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSavingBlogSettings, setIsSavingBlogSettings] = useState(false)
@@ -239,27 +241,22 @@ export default function AdminSettingsPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
-        <div className="flex justify-center items-center py-20">
-          <Spinner className="h-8 w-8" />
-        </div>
-      </AdminLayout>
+      <div className="flex justify-center items-center py-20">
+        <Spinner className="h-8 w-8" />
+      </div>
     )
   }
 
   if (error) {
     return (
-      <AdminLayout>
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      </AdminLayout>
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     )
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-8">
+    <div className="space-y-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold">设置中心</h2>
@@ -267,7 +264,7 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        <Card className="shadow-sm border-slate-200">
+        <Card className="shadow-sm border-border">
           <CardHeader>
             <CardTitle>用户信息</CardTitle>
             <CardDescription>展示当前登录用户，点击头像即可编辑个人资料。</CardDescription>
@@ -277,47 +274,51 @@ export default function AdminSettingsPage() {
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="group relative rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                  className="group relative rounded-full ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <img
-                    src={user?.avatar || "/placeholder.svg"}
+                    src={userAvatarSrc}
                     alt="用户头像"
                     className="h-24 w-24 rounded-full object-cover shadow-md"
                   />
-                  <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-[color:var(--overlay-strong)] px-3 py-1 text-xs text-[color:var(--overlay-foreground)] opacity-0 transition-opacity group-hover:opacity-100">
                     编辑信息
                   </span>
                 </button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>编辑用户资料</DialogTitle>
-                  <DialogDescription>更新头像、昵称、邮箱与个性签名。</DialogDescription>
-                </DialogHeader>
+                  <DialogHeader>
+                    <DialogTitle>编辑用户资料</DialogTitle>
+                    <DialogDescription>更新昵称、邮箱与个性签名。</DialogDescription>
+                  </DialogHeader>
                 <div className="space-y-5">
                   <div className="flex items-center gap-4">
                     <img
-                      src={user?.avatar || "/placeholder.svg"}
+                      src={userAvatarSrc}
                       alt="当前头像"
                       className="h-16 w-16 rounded-full border object-cover"
                     />
                     <div className="space-y-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => avatarInputRef.current?.click()}
-                        disabled={isUploadingAvatar}
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        {isUploadingAvatar ? "上传中..." : "上传新头像"}
-                      </Button>
-                      <input
-                        ref={avatarInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleAvatarUpload}
-                      />
-                      <p className="text-xs text-muted-foreground">支持 JPG、PNG、GIF，最大 5MB。</p>
+                      {isAvatarUploadEnabled ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            onClick={() => avatarInputRef.current?.click()}
+                            disabled={isUploadingAvatar}
+                          >
+                            <Upload className="mr-2 h-4 w-4" />
+                            {isUploadingAvatar ? "上传中..." : "上传新头像"}
+                          </Button>
+                          <input
+                            ref={avatarInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleAvatarUpload}
+                          />
+                          <p className="text-xs text-muted-foreground">支持 JPG、PNG、GIF，最大 5MB。</p>
+                        </>
+                      ) : null}
                     </div>
                   </div>
 	                  <div className="space-y-4">
@@ -371,7 +372,7 @@ export default function AdminSettingsPage() {
                     取消
                   </Button>
                   <Button
-                    className="bg-slate-900 text-white hover:bg-slate-800"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
                     onClick={handleProfileSave}
                     disabled={isSavingProfile}
                   >
@@ -389,7 +390,7 @@ export default function AdminSettingsPage() {
               <p className="text-sm text-muted-foreground">
                 {profile.email || user?.email || "尚未设置邮箱"}
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {settings.blogDescription ? `“${settings.blogDescription}”` : "点击头像更新个人信息"}
               </p>
             </div>
@@ -399,14 +400,14 @@ export default function AdminSettingsPage() {
           </CardFooter>
         </Card>
 
-	        <Card className="shadow-sm border-slate-200">
+	        <Card className="shadow-sm border-border">
 	          <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
 	            <div className="space-y-1.5">
 	              <CardTitle>博客设置</CardTitle>
 	              <CardDescription>配置站点基本信息与展示行为。</CardDescription>
 	            </div>
 	            <Button
-	              className="bg-slate-900 text-white hover:bg-slate-800"
+	              className="bg-primary text-primary-foreground hover:bg-primary/90"
 	              onClick={handleBlogSettingsSave}
 	              disabled={isSavingBlogSettings}
 	            >
@@ -468,7 +469,7 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-slate-200">
+        {/* <Card className="shadow-sm border-border">
           <CardHeader>
             <CardTitle>主题外观</CardTitle>
             <CardDescription>在此选择博客主题，效果会在保存后应用。</CardDescription>
@@ -480,11 +481,11 @@ export default function AdminSettingsPage() {
                 return (
                   <div
                     key={theme.id}
-                    className={`rounded-2xl border bg-white p-4 transition-shadow ${
-                      isActive ? "border-slate-900 shadow-lg" : "border-slate-200"
+                    className={`rounded-2xl border bg-card p-4 transition-shadow ${
+                      isActive ? "border-primary shadow-lg" : "border-border"
                     }`}
                   >
-                    <div className="mb-4 overflow-hidden rounded-xl bg-slate-100">
+                    <div className="mb-4 overflow-hidden rounded-xl bg-muted">
                       <img src={theme.previewUrl || "/placeholder.svg"} alt={theme.name} className="h-40 w-full object-cover" />
                     </div>
                     <div className="flex items-start justify-between">
@@ -496,7 +497,7 @@ export default function AdminSettingsPage() {
                     </div>
 	                    <Button
 	                      variant={isActive ? "outline" : "default"}
-	                      className={`mt-4 w-full ${!isActive ? "bg-slate-900 text-white hover:bg-slate-800" : ""}`}
+	                      className={`mt-4 w-full ${!isActive ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}`}
 	                      disabled={isActive || isSavingTheme}
 	                      onClick={() => handleThemeActivate(theme.slug)}
 	                    >
@@ -507,8 +508,7 @@ export default function AdminSettingsPage() {
               })}
             </div>
           </CardContent>
-        </Card>
-      </div>
-    </AdminLayout>
+        </Card> */}
+    </div>
   )
 }
