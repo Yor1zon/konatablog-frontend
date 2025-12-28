@@ -4,6 +4,7 @@ const defaultBackendOrigin =
 const backendOrigin = (process.env.BACKEND_ORIGIN || defaultBackendOrigin).replace(/\/$/, "")
 
 const nextConfig = {
+  output: "standalone",
   typescript: {
     ignoreBuildErrors: true,
   },
